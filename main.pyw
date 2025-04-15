@@ -10,11 +10,7 @@
 """
 
 import pygame
-import pygame.freetype
 import game_objects as obj
-import pyautogui
-import pygetwindow as pg
-import math
 import random
 import sys
 from pygame import mixer
