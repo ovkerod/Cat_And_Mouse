@@ -66,6 +66,10 @@ game_manager = obj.GameManager()
 def reset_button_command():
     return True
 
+def end_session():
+    pygame.quit()
+    sys.exit()
+
 
 def generate_text(text, fg, bg, rect_center, border=None, border_width=5, font=basic_font_large):
     return_text = font.render(text, True, fg, bg)
@@ -79,6 +83,9 @@ def generate_text(text, fg, bg, rect_center, border=None, border_width=5, font=b
 
 reset_button = obj.Button(text="Main Menu", command=reset_button_command,
                           position=(w//2, 2*h//3), fg=BLACK, bg=DIRT, border_color=BLACK, font=basic_font_large)
+
+exit_button = obj.Button(text="Quit Game", command=end_session,
+                          position=(w//2, 9*h//10), fg=BLACK, bg=GREEN, border_color=BLACK, font=basic_font_large)
 
 
 def keep_mouse_inbounds():
@@ -139,6 +146,10 @@ def generate_start_screen():
 
     mute_button.rect= pygame.Rect(w/2, 4*h/5, mute_button.w, mute_button.h)
     screen.blit(mute_button.sprites[int(mute_button.audio_playing)], mute_button.rect)
+
+    pygame.draw.rect(screen, exit_button.border_color,
+                        exit_button.border_rect)
+    screen.blit(exit_button.text, exit_button.rect)
 
     version_text, version_rect = generate_text(
         "Alpha Version 1.0.0 \u00A9 Oleksander Kerod 2024",
@@ -208,9 +219,7 @@ def reset_home_anim():
     player.spawn()
 
 
-def end_session():
-    pygame.quit()
-    sys.exit()
+
 
 
 def main():
@@ -234,6 +243,8 @@ def main():
                     else:
                         mute_button.audio_playing = True
                         mixer.music.set_volume(0.5)
+                elif exit_button.rect.collidepoint(event.pos):
+                    exit_button.command()
                 else:
                     menu_cat.despawn()
                     started = True
