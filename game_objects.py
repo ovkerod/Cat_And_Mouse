@@ -12,7 +12,7 @@ deg_to_rad = math.pi / 180
 class Cat(object):
     def __init__(self, screen_size):
         self.screen_size = screen_size
-
+    
         # import and format running animations
         running_file_list = [file for file in pathlib.Path(
             'Assets/3 Cat/Run Frames').iterdir()]
@@ -39,6 +39,7 @@ class Cat(object):
         self.direction = None
         self.collision_side = None
         self.speed = 8
+        self.speed_hold = None
         self.wait_time = 500
         self.collision_rect = None
         self.pause_hold_state = None
@@ -247,7 +248,24 @@ class Button(object):
             self.rect.height + 2 * border_width
             )
 
+class AudioButton(object):
+    def __init__(self, w, h):
+        self.audio_playing_sprite = pygame.transform.scale(
+            pygame.image.load('Assets/Audio/Playing.png'), (w*0.025, h*0.035))
 
+        self.audio_muted_sprite = pygame.transform.scale(
+                    pygame.image.load('Assets/Audio/Muted.png'), (w*0.025, h*0.035))
+
+        self.sprites = (self.audio_muted_sprite, self.audio_playing_sprite)
+
+        self.w, self.h = self.audio_playing_sprite.get_size()
+        self.rect: pygame.Rect = None
+
+        self.audio_playing = True
+
+    
+        
+        
 # abstract objects
 
 

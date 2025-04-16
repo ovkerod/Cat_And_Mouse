@@ -31,14 +31,21 @@ pygame.init()
 mixer.init()
 mixer.music.load("Assets/Audio/Music/game-music-loop-7-145285.mp3")
 mixer.music.play(-1)
+mixer.music.set_volume(0.5)
 # Set the width and height of the screen [width, height]
-SPACING = 150
+
 cat_border = 25
 GAME_NAME = "Cat and Mouse"
-screen = pygame.display.set_mode((1500, 1200))
+screen_w, screen_h = pygame.display.get_desktop_sizes()[0]
+screen = pygame.display.set_mode((int((screen_w*.75)//1), int((screen_h*.75)//1)))
 w, h = pygame.display.get_surface().get_size()
+SPACING = (h+w)/2 * 0.1
+
+mute_button = obj.AudioButton(w, h)
 
 pygame.display.set_caption("Cat and Mouse")
+
+
 
 fancy_font = pygame.font.SysFont(name='vivaldi', size=125)
 basic_font_small = pygame.font.SysFont(name='arial', size=12)
@@ -124,9 +131,14 @@ def generate_start_screen():
         text, text_rect = generate_text(
             text=item, fg=BLACK, bg=LIGHT_BLUE, rect_center=rect_center, font=fancy_font)
         screen.blit(text, text_rect)
+
     start_text, start_rect = generate_text(
         "(Click Anywhere to Start)", DIRT, GREEN, (w//2, 45*h//64))
     screen.blit(start_text, start_rect)
+
+
+    mute_button.rect= pygame.Rect(w/2, 4*h/5, mute_button.w, mute_button.h)
+    screen.blit(mute_button.sprites[int(mute_button.audio_playing)], mute_button.rect)
 
     version_text, version_rect = generate_text(
         "Alpha Version 1.0.0 \u00A9 Oleksander Kerod 2024",
@@ -177,13 +189,14 @@ def generate_play_screen():
         pygame.draw.rect(
             screen, DIRT, [w//3-20, h//4-20, w//3+40, h//2+40], 0)
         pygame.draw.rect(
-            screen, DARK_GREEN, [w//3, h//4, w//3, h//2], 0)
+            screen, LIGHT_BLUE, [w//3, h//4, w//3, h//2], 0)
         pause_text, pause_rect = generate_text(
-            "Paused", BLACK, DARK_GREEN, (w//2, h//3), font=basic_font_xl)
+            "Paused", BLACK, LIGHT_BLUE, (w//2, h//3), font=basic_font_xl)
         screen.blit(pause_text, pause_rect)
         pygame.draw.rect(screen, reset_button.border_color,
                          reset_button.border_rect)
-
+        mute_button.rect= pygame.Rect(w/2, h/2, mute_button.w, mute_button.h)
+        screen.blit(mute_button.sprites[int(mute_button.audio_playing)], mute_button.rect)
         screen.blit(reset_button.text, reset_button.rect)
 
 
@@ -196,6 +209,7 @@ def reset_home_anim():
 
 
 def end_session():
+    print(pygame.display.get_desktop_sizes())
     pygame.quit()
     sys.exit()
 
@@ -205,6 +219,7 @@ def main():
     clock = pygame.time.Clock()
     previous_animation_time = pygame.time.get_ticks()
     started = False
+
     pygame.mouse.set_visible(True)
     reset_home_anim()
     while not started:
@@ -213,8 +228,16 @@ def main():
                 end_session()
 
             if event.type == pygame.MOUSEBUTTONUP:
-                menu_cat.despawn()
-                started = True
+                if mute_button.rect.collidepoint(event.pos):
+                    if mute_button.audio_playing:
+                        mute_button.audio_playing = False
+                        mixer.music.set_volume(0)
+                    else:
+                        mute_button.audio_playing = True
+                        mixer.music.set_volume(0.5)
+                else:
+                    menu_cat.despawn()
+                    started = True
         current_time = pygame.time.get_ticks()
         # home screen animation
 
@@ -255,22 +278,32 @@ def main():
         cats[0].running = True
     next_spawn = 1
     collision_counter = 0
-
+    total_pause_duration = 0
+    pause_duration = 0
     pygame.mouse.set_pos([w//2, h//2])
     # -------- Main Program Loop -----------
     session_start_timer = pygame.time.get_ticks()
     while not done:
+        current_time = pygame.time.get_ticks()
+        running_time = current_time - pause_duration - total_pause_duration
         # --- Main event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 end_session()
-            if event.type == pygame.MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP and paused:
+                if mute_button.rect.collidepoint(event.pos):
+                    if mute_button.audio_playing:
+                        mute_button.audio_playing = False
+                        mixer.music.set_volume(0)
+                    else:
+                        mute_button.audio_playing = True
+                        mixer.music.set_volume(0.5)
                 try:
                     if reset_button.rect.collidepoint(event.pos) and (not player.active or paused):
                         done = reset_button.command()
                 except NameError:
                     pass
-
+            
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
 
@@ -279,11 +312,16 @@ def main():
                         pygame.mouse.set_visible(False)
                         pygame.mouse.set_pos((player.location[0] + player.sprite.get_width()//2,
                                               player.location[1] + player.sprite.get_height()//2))
+                        total_pause_duration += pause_duration
+                        pause_duration = 0
+
                     else:
                         paused = True
                         pygame.mouse.set_visible(True)
+                        pause_start_time = current_time
+
         # --- Game logic should go here
-        current_time = pygame.time.get_ticks()
+
         if not player.active and session_active and not paused:
             player.active = True
             player.location = (
@@ -303,7 +341,7 @@ def main():
                                          cat.location[1] + cat.sprite.get_size()[1] >= h-cat_border: 'bottom', cat.location[1] <= cat_border: 'top'}
                         if cat.collision_side != side_detector[True]:
                             cat.stop_time = pygame.time.get_ticks()
-                            speed_hold = cat.speed
+                            cat.speed_hold = cat.speed
                             cat.speed = 0
                             cat.running = False
                             cat.collision_side = side_detector[True]
@@ -327,7 +365,7 @@ def main():
                             print(f"""Launch Timing Error : {
                                 cat.launch_time - cat.stop_time}, Cat No. {index}""")
                         cat.attack(pygame.mouse.get_pos())
-                        cat.speed = speed_hold
+                        cat.speed = cat.speed_hold
                         cat.running = True
 
                         cat.speed = min(cat.speed + 1, 20)
@@ -358,14 +396,14 @@ def main():
                 previous_location = player.location[0]
             else:
                 player.running = False
-            if player.immune and current_time - immunity_time > 2000:
+            if player.immune and running_time - immunity_time > 2000:
                 player.immune = False
 
             # cheese logic
             for cheese in cheese_objects:
-                if not cheese.spawned and current_time - previous_cheese_spawn_time > 5000:
+                if not cheese.spawned and running_time - previous_cheese_spawn_time > 5000:
                     cheese.spawn()
-                    previous_cheese_spawn_time = current_time
+                    previous_cheese_spawn_time = running_time
                     break
                 elif cheese.spawned and cheese.collision_rect.colliderect(player.collision_rect):
                     game_manager.eat_cheese()
@@ -374,14 +412,16 @@ def main():
         # pause logic
 
         if paused:
-
             for cat in cats:
                 if not cat.paused:
                     cat.pause()
+            pause_duration = current_time - pause_start_time
+            print(pause_duration)
         else:
             for cat in cats:
                 if cat.paused:
                     cat.unpause()
+
 
         # animation control
         if current_time - previous_animation_time > 100:
