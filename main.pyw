@@ -270,16 +270,20 @@ def main():
     session_active = True
     immunity_time = 0
     death_time = None
+    
     if not peaceful:
         cats[0].spawn(location=[50, 50])
-        cats[0].attack(pygame.mouse.get_pos())
         cats[0].speed = 8
+        cats[0].pause_hold_state = (True, 8)
+        cats[0].attack(pygame.mouse.get_pos())
         cats[0].stop_time = pygame.time.get_ticks()
         cats[0].running = True
+
     next_spawn = 1
     collision_counter = 0
     total_pause_duration = 0
     pause_duration = 0
+
     pygame.mouse.set_pos([w//2, h//2])
     # -------- Main Program Loop -----------
     session_start_timer = pygame.time.get_ticks()
@@ -372,7 +376,7 @@ def main():
                         cat.wait_time = random.randint(50, 2000)
                     if not player.immune and cat.collision_rect.colliderect(player.collision_rect):
                         player.immune = True
-                        immunity_time = pygame.time.get_ticks()
+                        immunity_time = running_time
                         death = game_manager.touch_cat()
                         if death:
                             for cat in cats:
@@ -416,7 +420,6 @@ def main():
                 if not cat.paused:
                     cat.pause()
             pause_duration = current_time - pause_start_time
-            print(pause_duration)
         else:
             for cat in cats:
                 if cat.paused:
