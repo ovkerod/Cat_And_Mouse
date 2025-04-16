@@ -20,6 +20,7 @@ from pygame import mixer
 BLACK = (0, 0, 0)
 DIRT = (81, 51, 7)
 WHITE = (255, 255, 255)
+GREY = (125, 125, 125)
 GREEN = (0, 125, 0)
 DARK_GREEN = (0, 25, 0)
 RED = (255, 0, 0)
@@ -178,15 +179,15 @@ def generate_play_screen():
         pygame.draw.rect(
             screen, DIRT, [w//3-20, h//4-20, w//3+40, h//2+40], 0)
         pygame.draw.rect(
-            screen, DARK_GREEN, [w//3, h//4, w//3, h//2], 0)
+            screen, GREY, [w//3, h//4, w//3, h//2], 0)
         final_score_text, final_score_rect = generate_text(f"Final Score: {game_manager.score}",
                                                            WHITE,
-                                                           DARK_GREEN,
+                                                           GREY,
                                                            (w//2, h//3)
                                                            )
         final_time_text, final_time_rect = generate_text(f"Survival Time: {player.survival_time} s",
                                                          WHITE,
-                                                         DARK_GREEN,
+                                                         GREY,
                                                          (w//2, h//2)
                                                          )
         screen.blit(final_score_text, final_score_rect)
@@ -200,13 +201,13 @@ def generate_play_screen():
         pygame.draw.rect(
             screen, DIRT, [w//3-20, h//4-20, w//3+40, h//2+40], 0)
         pygame.draw.rect(
-            screen, LIGHT_BLUE, [w//3, h//4, w//3, h//2], 0)
+            screen, GREY, [w//3, h//4, w//3, h//2], 0)
         pause_text, pause_rect = generate_text(
-            "Paused", BLACK, LIGHT_BLUE, (w//2, h//3), font=basic_font_xl)
+            "Paused", BLACK, GREY, (w//2, h//3), font=basic_font_xl)
         screen.blit(pause_text, pause_rect)
         pygame.draw.rect(screen, reset_button.border_color,
                          reset_button.border_rect)
-        mute_button.rect= pygame.Rect(w/2, h/2, mute_button.w, mute_button.h)
+        mute_button.rect= pygame.Rect(w/2 - mute_button.w/2, h/2 - mute_button.h/2, mute_button.w, mute_button.h)
         screen.blit(mute_button.sprites[int(mute_button.audio_playing)], mute_button.rect)
         screen.blit(reset_button.text, reset_button.rect)
 
@@ -304,8 +305,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 end_session()
-            if event.type == pygame.MOUSEBUTTONUP and paused:
-                if mute_button.rect.collidepoint(event.pos):
+            if event.type == pygame.MOUSEBUTTONUP and (paused or not player.active):
+                if mute_button.rect.collidepoint(event.pos) and paused:
                     if mute_button.audio_playing:
                         mute_button.audio_playing = False
                         mixer.music.set_volume(0)
@@ -313,13 +314,13 @@ def main():
                         mute_button.audio_playing = True
                         mixer.music.set_volume(0.5)
                 try:
-                    if reset_button.rect.collidepoint(event.pos) and (not player.active or paused):
+                    if reset_button.rect.collidepoint(event.pos):
                         done = reset_button.command()
                 except NameError:
                     pass
             
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE and session_active:
 
                     if paused:
                         paused = False
