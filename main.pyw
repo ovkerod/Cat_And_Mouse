@@ -144,7 +144,7 @@ def generate_start_screen():
     screen.blit(start_text, start_rect)
 
 
-    mute_button.rect= pygame.Rect(w/2, 4*h/5, mute_button.w, mute_button.h)
+    mute_button.rect= pygame.Rect(w/2-mute_button.w/2, 4*h/5 - mute_button.h/2, mute_button.w, mute_button.h)
     screen.blit(mute_button.sprites[int(mute_button.audio_playing)], mute_button.rect)
 
     pygame.draw.rect(screen, exit_button.border_color,
