@@ -377,7 +377,7 @@ def main():
                     if pygame.time.get_ticks() - cat.stop_time > cat.wait_time and not cat.running and not cat.paused:
                         cat.launch_time = pygame.time.get_ticks()
                         if (cat.launch_time - cat.stop_time > 2000):
-                            print(f"""Launch Timing Error : {
+                            print(f"""Launch Timing Error: {
                                 cat.launch_time - cat.stop_time}, Cat No. {index}""")
                         cat.attack(pygame.mouse.get_pos())
                         cat.speed = cat.speed_hold
