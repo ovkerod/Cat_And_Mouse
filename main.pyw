@@ -281,7 +281,7 @@ def main():
     session_active = True
     immunity_time = 0
     death_time = None
-    
+    pygame.mouse.set_pos([w//2, h//2])   
     if not peaceful:
         cats[0].spawn(location=[50, 50])
         cats[0].speed = 8
@@ -295,7 +295,7 @@ def main():
     total_pause_duration = 0
     pause_duration = 0
 
-    pygame.mouse.set_pos([w//2, h//2])
+
     # -------- Main Program Loop -----------
     session_start_timer = pygame.time.get_ticks()
     while not done:
