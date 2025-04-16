@@ -62,7 +62,6 @@ class Cat(object):
 
     def move(self):
         self.location[0] += self.speed * math.cos(self.direction)
-        print(self.speed)
         self.location[1] += self.speed * math.sin(-self.direction)
         self.collision_rect = self.sprite.get_rect()
 

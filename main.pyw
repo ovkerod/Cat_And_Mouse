@@ -209,7 +209,6 @@ def reset_home_anim():
 
 
 def end_session():
-    print(pygame.display.get_desktop_sizes())
     pygame.quit()
     sys.exit()
 
