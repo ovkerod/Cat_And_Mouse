@@ -448,7 +448,7 @@ def main():
                     player.animate_death()
                     if player.death_anim_index == 0:
                         if not death_time:
-                            death_time = current_time
+                            death_time = running_time
                             player.survival_time = (
                                 death_time - session_start_timer) / 1000
                         player.death_anim_index -= 1
