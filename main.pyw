@@ -29,22 +29,26 @@ LIGHT_BLUE = (135, 206, 235)
 YELLOW = ('#E2BC00')
 
 pygame.init()
+
 mixer.init()
 mixer.music.load("Assets/Audio/Music/game-music-loop-7-145285.mp3")
 mixer.music.play(-1)
 mixer.music.set_volume(0.5)
+
+
 # Set the width and height of the screen [width, height]
 
-cat_border = 25
+
 GAME_NAME = "Cat and Mouse"
 screen_w, screen_h = pygame.display.get_desktop_sizes()[0]
-screen = pygame.display.set_mode((int((screen_w*.75)//1), int((screen_h*.75)//1)))
-w, h = pygame.display.get_surface().get_size()
+screen = pygame.display.set_mode((int((screen_w*.75)), int((screen_h*.75))))
+w, h = screen.get_size()
 SPACING = (h+w)/2 * 0.1
+CAT_BORDER = (h+w)/2 * 0.025
 
 mute_button = obj.AudioButton(w, h)
 
-pygame.display.set_caption("Cat and Mouse")
+pygame.display.set_caption(GAME_NAME)
 
 
 
@@ -72,14 +76,7 @@ def end_session():
     sys.exit()
 
 
-def generate_text(text, fg, bg, rect_center, border=None, border_width=5, font=basic_font_large):
-    return_text = font.render(text, True, fg, bg)
-    return_rect = return_text.get_rect()
-    return_rect.center = rect_center
-    if border:
-        border_rect = return_rect.inflate(border_width, border_width)
-        return (return_text, return_rect, (border, border_rect))
-    return return_text, return_rect
+
 
 
 reset_button = obj.Button(text="Main Menu", command=reset_button_command,
@@ -88,6 +85,14 @@ reset_button = obj.Button(text="Main Menu", command=reset_button_command,
 exit_button = obj.Button(text="Quit Game", command=end_session,
                           position=(w//2, 9*h//10), fg=BLACK, bg=GREEN, border_color=BLACK, font=basic_font_large)
 
+def generate_text(text, fg, bg, rect_center, border=None, border_width=5, font=basic_font_large):
+    return_text = font.render(text, True, fg, bg)
+    return_rect = return_text.get_rect()
+    return_rect.center = rect_center
+    if border:
+        border_rect = return_rect.inflate(border_width, border_width)
+        return (return_text, return_rect, (border, border_rect))
+    return return_text, return_rect
 
 def keep_mouse_inbounds():
     PLAY_AREA_LEFT = SPACING
@@ -132,7 +137,7 @@ def generate_start_screen():
         screen, GREEN, [0, 2*h//3, w, h//3], 0)
     pygame.draw.rect(
         screen, DIRT, [0, 3*h//4, w, h//4], 0)
-    text_items = ['Cat', 'and', 'Mouse']
+    text_items = GAME_NAME.split(" ")
     generate_creatures()
     for index, item in enumerate(text_items):
         rect_center = (w * (index+1) // 4, 100 + h * (index+1) // 8)
@@ -351,9 +356,9 @@ def main():
                 if cat.spawned and player.active:
                     cat.move()
                     cat.update_rect()
-                    if cat.location[0] + cat.sprite.get_size()[0] >= w-cat_border or cat.location[0] <= cat_border or cat.location[1] + cat.sprite.get_size()[1] >= h - cat_border or cat.location[1] <= cat_border:
-                        side_detector = {cat.location[0] + cat.sprite.get_size()[0] >= w-cat_border: 'right', cat.location[0] <= cat_border: 'left',
-                                         cat.location[1] + cat.sprite.get_size()[1] >= h-cat_border: 'bottom', cat.location[1] <= cat_border: 'top'}
+                    if cat.location[0] + cat.sprite.get_size()[0] >= w-CAT_BORDER or cat.location[0] <= CAT_BORDER or cat.location[1] + cat.sprite.get_size()[1] >= h - CAT_BORDER or cat.location[1] <= CAT_BORDER:
+                        side_detector = {cat.location[0] + cat.sprite.get_size()[0] >= w-CAT_BORDER: 'right', cat.location[0] <= CAT_BORDER: 'left',
+                                         cat.location[1] + cat.sprite.get_size()[1] >= h-CAT_BORDER: 'bottom', cat.location[1] <= CAT_BORDER: 'top'}
                         if cat.collision_side != side_detector[True]:
                             cat.stop_time = pygame.time.get_ticks()
                             cat.speed_hold = cat.speed
