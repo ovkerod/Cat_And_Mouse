@@ -41,7 +41,7 @@ mixer.music.set_volume(0.5)
 
 GAME_NAME = "Cat and Mouse"
 screen_w, screen_h = pygame.display.get_desktop_sizes()[0]
-screen = pygame.display.set_mode((int((screen_w*.75)), int((screen_h*.75))))
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 w, h = screen.get_size()
 SPACING = (h+w)/2 * 0.1
 CAT_BORDER = (h+w)/2 * 0.025
@@ -177,7 +177,7 @@ def generate_play_screen():
         f"Score: {game_manager.score}", BLACK, DIRT, (100, 30))
     screen.blit(score_text, score_rect)
     for i in range(game_manager.health):
-        screen.blit(heart.sprite, (70 + 30*i, 60))
+        screen.blit(heart.sprite, (70 + w/50*i, 60))
 
     # menu after player dies
     if not player.active:
